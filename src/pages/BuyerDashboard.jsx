@@ -1,10 +1,13 @@
 import { useProperties } from '../context/useProperties.jsx';
+import { useAuth } from '../context/useAuth.jsx';
 import PropertyCard from '../components/PropertyCard';
 
 const BuyerDashboard = () => {
-  const { savedProperties, properties } = useProperties();
+  const { user } = useAuth();
+  const { savedProperties, properties, appointments } = useProperties();
 
   const savedItems = properties.filter((p) => savedProperties.includes(p.id));
+  const myAppointments = appointments.filter((appointment) => appointment.buyerId === user?.id);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -25,7 +28,29 @@ const BuyerDashboard = () => {
 
       <div>
         <h2 className="text-2xl font-semibold mb-6">Scheduled Appointments</h2>
-        <p className="text-gray-500">No appointments yet (Mock)</p>
+        {myAppointments.length > 0 ? (
+          <div className="space-y-4">
+            {myAppointments.map((appointment) => (
+              <div key={appointment.id} className="bg-white rounded-2xl p-5 border">
+                <p className="font-semibold">{appointment.propertyName}</p>
+                <p className="text-sm text-gray-600 capitalize">
+                  {appointment.type} call on {appointment.date} at {appointment.time}
+                </p>
+                <span
+                  className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
+                    appointment.status === 'approved'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}
+                >
+                  {appointment.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No appointments scheduled yet.</p>
+        )}
       </div>
     </div>
   );

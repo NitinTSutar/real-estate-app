@@ -2,7 +2,7 @@ import { useProperties } from '../context/useProperties.jsx';
 import { useToast } from '../context/useToast.jsx';
 
 const AdminPanel = () => {
-  const { properties, setProperties } = useProperties();
+  const { properties, setProperties, appointments, approveAppointment } = useProperties();
   const { showToast } = useToast();
 
   const approveProperty = (id) => {
@@ -13,6 +13,11 @@ const AdminPanel = () => {
   const rejectProperty = (id) => {
     setProperties((prev) => prev.filter((p) => p.id !== id));
     showToast(`Property ID ${id} Rejected`, 'error');
+  };
+
+  const handleApproveAppointment = (appointmentId) => {
+    approveAppointment(appointmentId);
+    showToast('Appointment approved successfully.', 'success');
   };
 
   return (
@@ -63,6 +68,64 @@ const AdminPanel = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="bg-white rounded-3xl overflow-hidden shadow-sm mt-10">
+        <div className="p-5 border-b">
+          <h2 className="text-2xl font-semibold">Scheduled Appointments</h2>
+        </div>
+
+        {appointments.length > 0 ? (
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="p-4 text-left">Buyer</th>
+                <th className="p-4 text-left">Property</th>
+                <th className="p-4 text-left">Type</th>
+                <th className="p-4 text-left">Date & Time</th>
+                <th className="p-4 text-left">Status</th>
+                <th className="p-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {appointments.map((appointment) => (
+                <tr key={appointment.id} className="border-t">
+                  <td className="p-4">{appointment.buyerName}</td>
+                  <td className="p-4">{appointment.propertyName}</td>
+                  <td className="p-4 capitalize">{appointment.type}</td>
+                  <td className="p-4">
+                    {appointment.date} {appointment.time}
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs ${
+                        appointment.status === 'approved'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                      {appointment.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-center">
+                    {appointment.status !== 'approved' ? (
+                      <button
+                        onClick={() => handleApproveAppointment(appointment.id)}
+                        className="bg-green-600 text-white px-5 py-2 rounded-xl text-sm"
+                      >
+                        Approve
+                      </button>
+                    ) : (
+                      <span className="text-green-700 text-sm font-medium">Approved</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="p-5 text-gray-500">No appointments yet.</p>
+        )}
       </div>
     </div>
   );

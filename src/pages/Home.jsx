@@ -9,14 +9,15 @@ const Home = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBHK, setSelectedBHK] = useState("");
+  const [selectedPossession, setSelectedPossession] = useState("");
   const [budgetMin, setBudgetMin] = useState(0);
   const [budgetMax, setBudgetMax] = useState(50000000);
   const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'map'
 
   // Real-time filtering
   useEffect(() => {
-    filterProperties(searchTerm, selectedBHK, budgetMin, budgetMax);
-  }, [searchTerm, selectedBHK, budgetMin, budgetMax, filterProperties]);
+    filterProperties(searchTerm, selectedBHK, budgetMin, budgetMax, selectedPossession);
+  }, [searchTerm, selectedBHK, budgetMin, budgetMax, selectedPossession, filterProperties]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -46,6 +47,8 @@ const Home = () => {
           <FilterSidebar
             selectedBHK={selectedBHK}
             setSelectedBHK={setSelectedBHK}
+            selectedPossession={selectedPossession}
+            setSelectedPossession={setSelectedPossession}
             budgetMin={budgetMin}
             setBudgetMin={setBudgetMin}
             budgetMax={budgetMax}

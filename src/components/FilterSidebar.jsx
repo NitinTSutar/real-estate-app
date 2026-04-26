@@ -1,9 +1,11 @@
 const FilterSidebar = ({ 
   selectedBHK, setSelectedBHK, 
+  selectedPossession, setSelectedPossession,
   budgetMin, setBudgetMin, 
   budgetMax, setBudgetMax 
 }) => {
   const bhkOptions = ['1BHK', '2BHK', '3BHK', '4BHK'];
+  const possessionOptions = ['Ready', '6 months', '1 year'];
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm sticky top-24">
@@ -24,6 +26,25 @@ const FilterSidebar = ({
               }`}
             >
               {bhk}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <p className="font-medium mb-3">Possession Period</p>
+        <div className="flex flex-wrap gap-2">
+          {possessionOptions.map((option) => (
+            <button
+              key={option}
+              onClick={() => setSelectedPossession(selectedPossession === option ? '' : option)}
+              className={`px-4 py-2 rounded-xl text-sm transition-all ${
+                selectedPossession === option
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              {option}
             </button>
           ))}
         </div>
@@ -66,6 +87,7 @@ const FilterSidebar = ({
       <button 
         onClick={() => {
           setSelectedBHK('');
+          setSelectedPossession('');
           setBudgetMin(0);
           setBudgetMax(50000000);
         }}
