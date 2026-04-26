@@ -6,7 +6,7 @@ import { useToast } from '../context/useToast.jsx';
 
 const PropertyDetails = () => {
   const { id } = useParams();
-  const { properties, scheduleAppointment } = useProperties();
+  const { properties, scheduleAppointment, addInquiry } = useProperties();
   const { isLoggedIn, user } = useAuth();
   const { showToast } = useToast();
 
@@ -57,6 +57,27 @@ const PropertyDetails = () => {
     setShowScheduleModal(false);
     setSelectedDate('');
     setSelectedTime('');
+  };
+
+  const handleInquiry = () => {
+    if (!isLoggedIn) {
+      alert('Please login first to send an inquiry.');
+      return;
+    }
+
+    const message = window.prompt('Write your inquiry message', 'I am interested in this property.');
+    if (!message) return;
+
+    addInquiry({
+      propertyId: property.id,
+      propertyName: property.name,
+      sellerId: property.sellerId,
+      buyerId: user.id,
+      buyerName: user.name,
+      message,
+    });
+
+    showToast('Inquiry sent to seller.', 'success');
   };
 
   const formatPrice = (price) =>
@@ -146,6 +167,13 @@ const PropertyDetails = () => {
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold"
             >
               Schedule Video Call / Site Visit
+            </button>
+
+            <button
+              onClick={handleInquiry}
+              className="flex-1 bg-gray-800 hover:bg-black text-white py-4 rounded-2xl font-semibold"
+            >
+              Send Inquiry
             </button>
           </div>
         </div>

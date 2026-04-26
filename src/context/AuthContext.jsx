@@ -15,10 +15,17 @@ export const AuthProvider = ({ children }) => {
   });
 
   const login = (role = 'buyer') => {
+    const roleProfiles = {
+      buyer: { id: 'buyer1', name: 'Nitin Sharma', email: 'buyer@example.com' },
+      seller: { id: 'seller1', name: 'Riya Builder', email: 'seller@example.com' },
+      admin: { id: 'admin1', name: 'Admin User', email: 'admin@example.com' },
+    };
+    const profile = roleProfiles[role] ?? roleProfiles.buyer;
+
     const mockUser = {
-      id: 'user123',
-      name: 'Nitin Sharma',
-      email: 'nitin@example.com',
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
       role,
       avatar: 'https://picsum.photos/id/64/200/200',
     };

@@ -7,6 +7,7 @@ export const PropertyProvider = ({ children }) => {
   const [filteredProperties, setFilteredProperties] = useState(mockProperties);
   const [savedProperties, setSavedProperties] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
 
   const toggleSave = useCallback((propertyId) => {
     setSavedProperties((prev) => {
@@ -62,25 +63,39 @@ export const PropertyProvider = ({ children }) => {
     );
   }, []);
 
+  const addInquiry = useCallback((inquiry) => {
+    const newInquiry = {
+      id: Date.now(),
+      createdAt: new Date().toISOString(),
+      ...inquiry,
+    };
+    setInquiries((prev) => [newInquiry, ...prev]);
+    return newInquiry;
+  }, []);
+
   const value = useMemo(() => ({
     properties,
     filteredProperties,
     savedProperties,
     appointments,
+    inquiries,
     filterProperties,
     toggleSave,
     scheduleAppointment,
     approveAppointment,
+    addInquiry,
     setProperties,
   }), [
     properties,
     filteredProperties,
     savedProperties,
     appointments,
+    inquiries,
     filterProperties,
     toggleSave,
     scheduleAppointment,
     approveAppointment,
+    addInquiry,
     setProperties,
   ]);
 
