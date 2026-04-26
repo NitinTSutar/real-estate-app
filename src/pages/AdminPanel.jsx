@@ -4,6 +4,18 @@ import { useToast } from '../context/useToast.jsx';
 const AdminPanel = () => {
   const { properties, setProperties, appointments, approveAppointment } = useProperties();
   const { showToast } = useToast();
+  const registeredBuyers = Array.from(
+    new Map(
+      appointments
+        .filter((appointment) => appointment.buyerId)
+        .map((appointment) => [appointment.buyerId, { id: appointment.buyerId, name: appointment.buyerName }])
+    ).values()
+  );
+  const registeredSellers = Array.from(new Set(properties.map((property) => property.sellerId).filter(Boolean)))
+    .map((sellerId) => ({
+      id: sellerId,
+      name: `Seller ${sellerId}`,
+    }));
 
   const approveProperty = (id) => {
     setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, approved: true } : p)));
@@ -126,6 +138,60 @@ const AdminPanel = () => {
         ) : (
           <p className="p-5 text-gray-500">No appointments yet.</p>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm">
+          <div className="p-5 border-b">
+            <h2 className="text-2xl font-semibold">Registered Buyers</h2>
+          </div>
+          {registeredBuyers.length > 0 ? (
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="p-4 text-left">Buyer ID</th>
+                  <th className="p-4 text-left">Buyer Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {registeredBuyers.map((buyer) => (
+                  <tr key={buyer.id} className="border-t">
+                    <td className="p-4">{buyer.id}</td>
+                    <td className="p-4">{buyer.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="p-5 text-gray-500">No registered buyers yet.</p>
+          )}
+        </div>
+
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm">
+          <div className="p-5 border-b">
+            <h2 className="text-2xl font-semibold">Registered Sellers</h2>
+          </div>
+          {registeredSellers.length > 0 ? (
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="p-4 text-left">Seller ID</th>
+                  <th className="p-4 text-left">Display Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {registeredSellers.map((seller) => (
+                  <tr key={seller.id} className="border-t">
+                    <td className="p-4">{seller.id}</td>
+                    <td className="p-4">{seller.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="p-5 text-gray-500">No registered sellers yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );

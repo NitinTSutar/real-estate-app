@@ -1,8 +1,8 @@
 const MapView = ({ properties }) => {
   return (
-    <div className="bg-[#f1f5f9] border border-gray-300 rounded-3xl h-[520px] relative overflow-hidden shadow-inner">
+    <div className="bg-[#f1f5f9] border border-gray-300 rounded-3xl h-130 relative overflow-hidden shadow-inner">
       {/* Fake Google Maps style background */}
-      <div className="absolute inset-0 bg-[linear-gradient(#e2e8f0_1px,transparent_1px),linear-gradient(90deg,#e2e8f0_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(#e2e8f0_1px,transparent_1px),linear-gradient(90deg,#e2e8f0_1px,transparent_1px)] bg-size-[40px_40px]"></div>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
         <h3 className="text-3xl font-bold text-gray-800 mb-2">Mumbai & Thane Map</h3>
