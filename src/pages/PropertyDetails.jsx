@@ -1,0 +1,230 @@
+import { useParams, Link } from "react-router-dom";
+import { useProperties } from "../context/useProperties.jsx";
+import { useAuth } from "../context/useAuth.jsx";
+import { useState } from "react";
+import { useToast } from "../context/useToast.jsx";
+
+const PropertyDetails = () => {
+  const { id } = useParams();
+  const { properties } = useProperties();
+  const { isLoggedIn } = useAuth();
+  const { showToast } = useToast();
+
+  const property = properties.find((p) => p.id === parseInt(id));
+
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [appointmentType, setAppointmentType] = useState("video"); // video or site
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+
+  if (!property) {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+        <h2 className="text-3xl font-bold mb-4">Property Not Found</h2>
+        <Link to="/" className="text-blue-600 underline">
+          ← Back to Home
+        </Link>
+      </div>
+    );
+  }
+
+  const handleSchedule = () => {
+    if (!isLoggedIn) {
+      alert("Please login first to schedule a call or visit.");
+      return;
+    }
+
+    if (!selectedDate || !selectedTime) {
+      alert("Please select date and time");
+      return;
+    }
+
+    showToast(
+      `✅ ${appointmentType.toUpperCase()} Appointment Scheduled for ${selectedDate} at ${selectedTime}`,
+      "success",
+    );
+    setShowScheduleModal(false);
+  };
+
+  const formatPrice = (price) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(price);
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      <Link
+        to="/"
+        className="text-blue-600 mb-6 inline-flex items-center gap-2 hover:underline"
+      >
+        ← Back to All Properties
+      </Link>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* Left - Images & Videos */}
+        <div>
+          <img
+            src={property.image}
+            alt={property.name}
+            className="w-full rounded-3xl shadow-xl"
+          />
+
+          {/* Videos Section */}
+          <div className="mt-8">
+            <h3 className="font-semibold text-xl mb-4">Videos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {property.video && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Flat Tour Video</p>
+                  <iframe
+                    width="100%"
+                    height="220"
+                    src={property.video}
+                    title="Flat Video"
+                    className="rounded-2xl"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-gray-600 mb-2">
+                  Building & Locality
+                </p>
+                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-55 rounded-2xl flex items-center justify-center text-gray-500">
+                  Building & Locality Video (Placeholder)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right - Details */}
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{property.name}</h1>
+            <p className="text-gray-600 text-xl flex items-center gap-2">
+              📍 {property.location}
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-sm">
+            <p className="text-4xl font-bold text-blue-600 mb-1">
+              {formatPrice(property.price)}
+            </p>
+            <p className="text-gray-500">
+              ₹{Math.round(property.price / 100000)} Lakh • {property.area}
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-3">Amenities</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {property.amenities.map((amenity, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 bg-gray-50 px-4 py-3 rounded-xl"
+                >
+                  ✅ <span>{amenity}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="font-medium mb-2">
+              Possession:{" "}
+              <span className="font-semibold">{property.possession}</span>
+            </p>
+            <p className="text-gray-700 leading-relaxed">
+              {property.description}
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+            <button
+              onClick={() => window.open(`tel:9876543210`, "_self")}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-semibold flex items-center justify-center gap-2"
+            >
+              📞 Call Owner
+            </button>
+
+            <button
+              onClick={() => setShowScheduleModal(true)}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold"
+            >
+              Schedule Video Call / Site Visit
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Schedule Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
+            <h3 className="text-2xl font-semibold mb-6">
+              Schedule Appointment
+            </h3>
+
+            <div className="space-y-6">
+              <div>
+                <p className="font-medium mb-2">Type</p>
+                <div className="flex gap-3">
+                  {["video", "site"].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setAppointmentType(type)}
+                      className={`flex-1 py-3 rounded-2xl capitalize ${appointmentType === type ? "bg-blue-600 text-white" : "bg-gray-100"}`}
+                    >
+                      {type === "video" ? "Video Call" : "Site Visit"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-medium mb-2">Select Date</label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full p-4 border rounded-2xl"
+                />
+              </div>
+
+              <div>
+                <label className="block font-medium mb-2">Select Time</label>
+                <input
+                  type="time"
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  className="w-full p-4 border rounded-2xl"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={() => setShowScheduleModal(false)}
+                className="flex-1 py-4 border border-gray-300 rounded-2xl font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSchedule}
+                className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-semibold"
+              >
+                Confirm Appointment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PropertyDetails;
