@@ -1,19 +1,22 @@
-import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useProperties } from "../context/useProperties.jsx";
 import { useAuth } from "../context/useAuth.jsx";
-import { useState } from "react";
 import { useToast } from "../context/useToast.jsx";
 
 const PropertyDetails = () => {
   const { id } = useParams();
-  const { properties } = useProperties();
-  const { isLoggedIn } = useAuth();
+  const { properties, scheduleAppointment, addInquiry } = useProperties();
+  const { isLoggedIn, user } = useAuth();
   const { showToast } = useToast();
 
-  const property = properties.find((p) => p.id === parseInt(id));
+  const property = properties.find((p) => p.id === parseInt(id, 10));
+  const [sampleFlatVideo, buildingLocalityVideo] = Array.isArray(property?.videos)
+    ? property.videos
+    : [property?.video || "", ""];
 
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [appointmentType, setAppointmentType] = useState("video"); // video or site
+  const [appointmentType, setAppointmentType] = useState("video");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
@@ -22,7 +25,7 @@ const PropertyDetails = () => {
       <div className="max-w-4xl mx-auto px-6 py-20 text-center">
         <h2 className="text-3xl font-bold mb-4">Property Not Found</h2>
         <Link to="/" className="text-blue-600 underline">
-          ← Back to Home
+          Back to Home
         </Link>
       </div>
     );
@@ -39,11 +42,48 @@ const PropertyDetails = () => {
       return;
     }
 
+    scheduleAppointment({
+      propertyId: property.id,
+      propertyName: property.name,
+      buyerId: user.id,
+      buyerName: user.name,
+      type: appointmentType,
+      date: selectedDate,
+      time: selectedTime,
+    });
+
     showToast(
-      `✅ ${appointmentType.toUpperCase()} Appointment Scheduled for ${selectedDate} at ${selectedTime}`,
+      `${appointmentType.toUpperCase()} appointment scheduled for ${selectedDate} at ${selectedTime}.`,
       "success",
     );
+
     setShowScheduleModal(false);
+    setSelectedDate("");
+    setSelectedTime("");
+  };
+
+  const handleInquiry = () => {
+    if (!isLoggedIn) {
+      alert("Please login first to send an inquiry.");
+      return;
+    }
+
+    const message = window.prompt(
+      "Write your inquiry message",
+      "I am interested in this property.",
+    );
+    if (!message) return;
+
+    addInquiry({
+      propertyId: property.id,
+      propertyName: property.name,
+      sellerId: property.sellerId,
+      buyerId: user.id,
+      buyerName: user.name,
+      message,
+    });
+
+    showToast("Inquiry sent to seller.", "success");
   };
 
   const formatPrice = (price) =>
@@ -55,58 +95,64 @@ const PropertyDetails = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
-      <Link
-        to="/"
-        className="text-blue-600 mb-6 inline-flex items-center gap-2 hover:underline"
-      >
-        ← Back to All Properties
-      </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Left - Images & Videos */}
-        <div>
-          <img
-            src={property.image}
-            alt={property.name}
-            className="w-full rounded-3xl shadow-xl"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+          <div>
+            <img
+              src={property.image}
+              alt={property.name}
+              className="w-full rounded-3xl shadow-xl h-full object-cover"
+            />
+          </div>
 
-          {/* Videos Section */}
-          <div className="mt-8">
-            <h3 className="font-semibold text-xl mb-4">Videos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {property.video && (
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">Flat Tour Video</p>
-                  <iframe
-                    width="100%"
-                    height="220"
-                    src={property.video}
-                    title="Flat Video"
-                    className="rounded-2xl"
-                    allowFullScreen
-                  ></iframe>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">Sample Flat Video</p>
+              {sampleFlatVideo ? (
+                <iframe
+                  width="100%"
+                  height="220"
+                  src={sampleFlatVideo}
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  title="Flat Video"
+                  className="rounded-2xl"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-[220px] rounded-2xl flex items-center justify-center text-gray-500">
+                  Sample Flat Video (Placeholder)
                 </div>
               )}
-              <div>
-                <p className="text-sm text-gray-600 mb-2">
-                  Building & Locality
-                </p>
-                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-55 rounded-2xl flex items-center justify-center text-gray-500">
-                  Building & Locality Video (Placeholder)
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600 mb-2">
+                Building and Locality
+              </p>
+              {buildingLocalityVideo ? (
+                <iframe
+                  width="100%"
+                  height="220"
+                  src={buildingLocalityVideo}
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  title="Building and Locality Video"
+                  className="rounded-2xl"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-[220px] rounded-2xl flex items-center justify-center text-gray-500">
+                  Building and Locality Video (Placeholder)
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right - Details */}
         <div className="space-y-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">{property.name}</h1>
-            <p className="text-gray-600 text-xl flex items-center gap-2">
-              📍 {property.location}
-            </p>
+            <p className="text-gray-600 text-xl">{property.location}</p>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm">
@@ -114,20 +160,20 @@ const PropertyDetails = () => {
               {formatPrice(property.price)}
             </p>
             <p className="text-gray-500">
-              ₹{Math.round(property.price / 100000)} Lakh • {property.area}
+              Rs.{Math.round(property.price / 100000)} Lakh - {property.area}
             </p>
           </div>
 
           <div>
             <h3 className="font-semibold mb-3">Amenities</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {property.amenities.map((amenity, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 bg-gray-50 px-4 py-3 rounded-xl"
+            <div className="flex flex-wrap gap-2">
+              {property.amenities.map((amenity) => (
+                <span
+                  key={amenity}
+                  className="text-xs bg-gray-100 px-3 py-1 rounded-full"
                 >
-                  ✅ <span>{amenity}</span>
-                </div>
+                  {amenity}
+                </span>
               ))}
             </div>
           </div>
@@ -142,13 +188,12 @@ const PropertyDetails = () => {
             </p>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
             <button
-              onClick={() => window.open(`tel:9876543210`, "_self")}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-semibold flex items-center justify-center gap-2"
+              onClick={() => window.open("tel:9876543210", "_self")}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-semibold"
             >
-              📞 Call Owner
+              Call Owner
             </button>
 
             <button
@@ -157,11 +202,17 @@ const PropertyDetails = () => {
             >
               Schedule Video Call / Site Visit
             </button>
+
+            <button
+              onClick={handleInquiry}
+              className="flex-1 bg-gray-800 hover:bg-black text-white py-4 rounded-2xl font-semibold"
+            >
+              Send Inquiry
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Schedule Modal */}
       {showScheduleModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
@@ -228,3 +279,5 @@ const PropertyDetails = () => {
 };
 
 export default PropertyDetails;
+
+

@@ -6,6 +6,8 @@ export const PropertyProvider = ({ children }) => {
   const [properties, setProperties] = useState(mockProperties);
   const [filteredProperties, setFilteredProperties] = useState(mockProperties);
   const [savedProperties, setSavedProperties] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
 
   const toggleSave = useCallback((propertyId) => {
     setSavedProperties((prev) => {
@@ -16,15 +18,16 @@ export const PropertyProvider = ({ children }) => {
     });
   }, []);
 
-  const filterProperties = useCallback((searchTerm = '', bhk = '', budgetMin = 0, budgetMax = Infinity) => {
+  const filterProperties = useCallback((query = '', bhk = '', minPrice = 0, maxPrice = Infinity, possession = '') => {
     let result = [...properties];
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (query) {
+      const term = query.toLowerCase();
       result = result.filter((p) =>
         p.name.toLowerCase().includes(term) ||
         p.location.toLowerCase().includes(term) ||
-        p.city.toLowerCase().includes(term)
+        p.city.toLowerCase().includes(term) ||
+        p.state.toLowerCase().includes(term)
       );
     }
 
@@ -32,18 +35,69 @@ export const PropertyProvider = ({ children }) => {
       result = result.filter((p) => p.bhk === bhk);
     }
 
-    result = result.filter((p) => p.price >= budgetMin && p.price <= budgetMax);
+    if (possession) {
+      result = result.filter((p) => p.possession === possession);
+    }
+
+    result = result.filter((p) => p.price >= minPrice && p.price <= maxPrice);
     setFilteredProperties(result);
   }, [properties]);
+
+  const scheduleAppointment = useCallback((appointment) => {
+    const newAppointment = {
+      id: Date.now(),
+      status: 'pending',
+      ...appointment,
+    };
+    setAppointments((prev) => [newAppointment, ...prev]);
+    return newAppointment;
+  }, []);
+
+  const approveAppointment = useCallback((appointmentId) => {
+    setAppointments((prev) =>
+      prev.map((appointment) =>
+        appointment.id === appointmentId
+          ? { ...appointment, status: 'approved' }
+          : appointment
+      )
+    );
+  }, []);
+
+  const addInquiry = useCallback((inquiry) => {
+    const newInquiry = {
+      id: Date.now(),
+      createdAt: new Date().toISOString(),
+      ...inquiry,
+    };
+    setInquiries((prev) => [newInquiry, ...prev]);
+    return newInquiry;
+  }, []);
 
   const value = useMemo(() => ({
     properties,
     filteredProperties,
     savedProperties,
+    appointments,
+    inquiries,
     filterProperties,
     toggleSave,
+    scheduleAppointment,
+    approveAppointment,
+    addInquiry,
     setProperties,
-  }), [properties, filteredProperties, savedProperties, filterProperties, toggleSave, setProperties]);
+  }), [
+    properties,
+    filteredProperties,
+    savedProperties,
+    appointments,
+    inquiries,
+    filterProperties,
+    toggleSave,
+    scheduleAppointment,
+    approveAppointment,
+    addInquiry,
+    setProperties,
+  ]);
 
   return (
     <PropertyContext.Provider value={value}>
