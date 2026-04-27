@@ -22,7 +22,7 @@ const BuyerDashboard = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-lg">You haven't saved any properties yet. ❤️ Click heart icon on any property.</p>
+          <p className="text-gray-500 text-lg">You haven't saved any properties yet.</p>
         )}
       </div>
 

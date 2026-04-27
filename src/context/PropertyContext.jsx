@@ -18,16 +18,16 @@ export const PropertyProvider = ({ children }) => {
     });
   }, []);
 
-  const filterProperties = useCallback((searchTerm = '', bhk = '', budgetMin = 0, budgetMax = Infinity, possession = '') => {
+  const filterProperties = useCallback((query = '', bhk = '', minPrice = 0, maxPrice = Infinity, possession = '') => {
     let result = [...properties];
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (query) {
+      const term = query.toLowerCase();
       result = result.filter((p) =>
         p.name.toLowerCase().includes(term) ||
         p.location.toLowerCase().includes(term) ||
         p.city.toLowerCase().includes(term) ||
-        (p.state ?? 'Maharashtra').toLowerCase().includes(term)
+        p.state.toLowerCase().includes(term)
       );
     }
 
@@ -39,7 +39,7 @@ export const PropertyProvider = ({ children }) => {
       result = result.filter((p) => p.possession === possession);
     }
 
-    result = result.filter((p) => p.price >= budgetMin && p.price <= budgetMax);
+    result = result.filter((p) => p.price >= minPrice && p.price <= maxPrice);
     setFilteredProperties(result);
   }, [properties]);
 

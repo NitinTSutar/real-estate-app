@@ -1,21 +1,13 @@
 import { useProperties } from '../context/useProperties.jsx';
 import { useToast } from '../context/useToast.jsx';
+import { useAuth } from '../context/useAuth.jsx';
 
 const AdminPanel = () => {
   const { properties, setProperties, appointments, approveAppointment } = useProperties();
   const { showToast } = useToast();
-  const registeredBuyers = Array.from(
-    new Map(
-      appointments
-        .filter((appointment) => appointment.buyerId)
-        .map((appointment) => [appointment.buyerId, { id: appointment.buyerId, name: appointment.buyerName }])
-    ).values()
-  );
-  const registeredSellers = Array.from(new Set(properties.map((property) => property.sellerId).filter(Boolean)))
-    .map((sellerId) => ({
-      id: sellerId,
-      name: `Seller ${sellerId}`,
-    }));
+  const { registeredUsers } = useAuth();
+  const registeredBuyers = registeredUsers.filter((user) => user.role === 'buyer');
+  const registeredSellers = registeredUsers.filter((user) => user.role === 'seller');
 
   const approveProperty = (id) => {
     setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, approved: true } : p)));
