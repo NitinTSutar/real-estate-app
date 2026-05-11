@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useProperties } from '../context/useProperties.jsx';
+import { useDispatch, useSelector } from 'react-redux';
 import PropertyCard from '../components/PropertyCard';
 import FilterSidebar from '../components/FilterSidebar';
 import MapView from '../components/MapView';
+import VirtualizedPropertyGrid from '../components/VirtualizedPropertyGrid';
+import { filterProperties } from '../store/propertySlice';
 
 const Home = () => {
-  const { filteredProperties, filterProperties } = useProperties();
+  const dispatch = useDispatch();
+  const filteredProperties = useSelector((state) => state.property.filteredProperties);
 
   const [query, setQuery] = useState('');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -13,20 +16,21 @@ const Home = () => {
     bhk: '',
     possession: '',
     minPrice: 0,
-    maxPrice: 50000000,
+    maxPrice: Infinity,
   });
   const [draftFilters, setDraftFilters] = useState(appliedFilters);
   const [view, setView] = useState('grid');
+  const shouldVirtualize = filteredProperties.length > 12;
 
   useEffect(() => {
-    filterProperties(
+    dispatch(filterProperties({
       query,
-      appliedFilters.bhk,
-      appliedFilters.minPrice,
-      appliedFilters.maxPrice,
-      appliedFilters.possession
-    );
-  }, [query, appliedFilters, filterProperties]);
+      bhk: appliedFilters.bhk,
+      minPrice: appliedFilters.minPrice,
+      maxPrice: appliedFilters.maxPrice,
+      possession: appliedFilters.possession,
+    }));
+  }, [query, appliedFilters, dispatch]);
 
   useEffect(() => {
     if (!isFilterModalOpen) return undefined;
@@ -92,11 +96,15 @@ const Home = () => {
 
       <div className="flex-1">
         {view === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          shouldVirtualize ? (
+            <VirtualizedPropertyGrid properties={filteredProperties} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+          )
         ) : (
           <MapView properties={filteredProperties} />
         )}

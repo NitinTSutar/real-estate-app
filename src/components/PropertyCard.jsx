@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/useAuth.jsx';
-import { useProperties } from '../context/useProperties.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleSave } from '../store/propertySlice';
 
 const PropertyCard = ({ property }) => {
-  const { isLoggedIn } = useAuth();
-  const { toggleSave, savedProperties = [] } = useProperties();
+  const dispatch = useDispatch();
+  const isLoggedIn = !!useSelector((state) => state.auth.user);
+  const savedProperties = useSelector((state) => state.property.savedProperties);
   const isSaved = savedProperties.includes(property.id);
 
   const handleSave = (event) => {
@@ -13,7 +14,7 @@ const PropertyCard = ({ property }) => {
       alert('Please login to save favorites.');
       return;
     }
-    toggleSave(property.id);
+    dispatch(toggleSave(property.id));
   };
 
   const formatPrice = (price) =>

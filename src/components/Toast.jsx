@@ -13,11 +13,11 @@ const Toast = ({ message, type = 'success', onClose }) => {
 
   return (
     <div className={`${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 max-w-sm`}>
-      <span className="text-xs font-semibold">{icon}</span>
+      <span className="text-xs bg-white text-black p-2 rounded-2xl font-semibold">{icon}</span>
       <div>
         <p className="font-medium">{message}</p>
       </div>
-      <button onClick={onClose} className="ml-auto text-white/80 hover:text-white">
+      <button onClick={onClose} className="ml-auto text-white/80 hover:text-white hover:cursor-pointer">
         x
       </button>
     </div>

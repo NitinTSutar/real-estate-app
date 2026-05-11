@@ -10,7 +10,7 @@ All data and workflows are mocked in the client using local state/context.
 
 - React JS (Functional Components)
 - React Router
-- Context API (Auth, Property, Toast contexts)
+- Redux Toolkit + React Redux (Auth, Property, Toast state)
 - Tailwind CSS (utility-first styling)
 - Mock data/state (no backend APIs)
 - Vite (build and dev tooling)
