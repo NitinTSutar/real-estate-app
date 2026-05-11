@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useProperties } from '../context/useProperties.jsx';
+import { useDispatch, useSelector } from 'react-redux';
 import PropertyCard from '../components/PropertyCard';
 import FilterSidebar from '../components/FilterSidebar';
 import MapView from '../components/MapView';
+import { filterProperties } from '../store/propertySlice';
 
 const Home = () => {
-  const { filteredProperties, filterProperties } = useProperties();
+  const dispatch = useDispatch();
+  const filteredProperties = useSelector((state) => state.property.filteredProperties);
 
   const [query, setQuery] = useState('');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -19,14 +21,14 @@ const Home = () => {
   const [view, setView] = useState('grid');
 
   useEffect(() => {
-    filterProperties(
+    dispatch(filterProperties({
       query,
-      appliedFilters.bhk,
-      appliedFilters.minPrice,
-      appliedFilters.maxPrice,
-      appliedFilters.possession
-    );
-  }, [query, appliedFilters, filterProperties]);
+      bhk: appliedFilters.bhk,
+      minPrice: appliedFilters.minPrice,
+      maxPrice: appliedFilters.maxPrice,
+      possession: appliedFilters.possession,
+    }));
+  }, [query, appliedFilters, dispatch]);
 
   useEffect(() => {
     if (!isFilterModalOpen) return undefined;

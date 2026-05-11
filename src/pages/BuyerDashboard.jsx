@@ -1,10 +1,11 @@
-import { useProperties } from '../context/useProperties.jsx';
-import { useAuth } from '../context/useAuth.jsx';
+import { useSelector } from 'react-redux';
 import PropertyCard from '../components/PropertyCard';
 
 const BuyerDashboard = () => {
-  const { user } = useAuth();
-  const { savedProperties, properties, appointments } = useProperties();
+  const user = useSelector((state) => state.auth.user);
+  const savedProperties = useSelector((state) => state.property.savedProperties);
+  const properties = useSelector((state) => state.property.properties);
+  const appointments = useSelector((state) => state.property.appointments);
 
   const savedItems = properties.filter((p) => savedProperties.includes(p.id));
   const myAppointments = appointments.filter((appointment) => appointment.buyerId === user?.id);

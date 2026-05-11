@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useProperties } from "../context/useProperties.jsx";
-import { useAuth } from "../context/useAuth.jsx";
-import { useToast } from "../context/useToast.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { addInquiry, scheduleAppointment } from "../store/propertySlice";
+import { showToast } from "../store/toastSlice";
 
 const PropertyDetails = () => {
+  const dispatch = useDispatch();
   const { id } = useParams();
-  const { properties, scheduleAppointment, addInquiry } = useProperties();
-  const { isLoggedIn, user } = useAuth();
-  const { showToast } = useToast();
+  const properties = useSelector((state) => state.property.properties);
+  const user = useSelector((state) => state.auth.user);
+  const isLoggedIn = !!user;
 
   const property = properties.find((p) => p.id === parseInt(id, 10));
   const [sampleFlatVideo, buildingLocalityVideo] = Array.isArray(property?.videos)
@@ -42,7 +43,7 @@ const PropertyDetails = () => {
       return;
     }
 
-    scheduleAppointment({
+    dispatch(scheduleAppointment({
       propertyId: property.id,
       propertyName: property.name,
       buyerId: user.id,
@@ -50,12 +51,12 @@ const PropertyDetails = () => {
       type: appointmentType,
       date: selectedDate,
       time: selectedTime,
-    });
+    }));
 
-    showToast(
-      `${appointmentType.toUpperCase()} appointment scheduled for ${selectedDate} at ${selectedTime}.`,
-      "success",
-    );
+    dispatch(showToast({
+      message: `${appointmentType.toUpperCase()} appointment scheduled for ${selectedDate} at ${selectedTime}.`,
+      type: "success",
+    }));
 
     setShowScheduleModal(false);
     setSelectedDate("");
@@ -74,16 +75,16 @@ const PropertyDetails = () => {
     );
     if (!message) return;
 
-    addInquiry({
+    dispatch(addInquiry({
       propertyId: property.id,
       propertyName: property.name,
       sellerId: property.sellerId,
       buyerId: user.id,
       buyerName: user.name,
       message,
-    });
+    }));
 
-    showToast("Inquiry sent to seller.", "success");
+    dispatch(showToast({ message: "Inquiry sent to seller.", type: "success" }));
   };
 
   const formatPrice = (price) =>
@@ -120,7 +121,7 @@ const PropertyDetails = () => {
                   allowFullScreen
                 ></iframe>
               ) : (
-                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-[220px] rounded-2xl flex items-center justify-center text-gray-500">
+                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-55 rounded-2xl flex items-center justify-center text-gray-500">
                   Sample Flat Video (Placeholder)
                 </div>
               )}
@@ -141,7 +142,7 @@ const PropertyDetails = () => {
                   allowFullScreen
                 ></iframe>
               ) : (
-                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-[220px] rounded-2xl flex items-center justify-center text-gray-500">
+                <div className="bg-gray-200 border-2 border-dashed border-gray-400 h-55 rounded-2xl flex items-center justify-center text-gray-500">
                   Building and Locality Video (Placeholder)
                 </div>
               )}
@@ -279,5 +280,4 @@ const PropertyDetails = () => {
 };
 
 export default PropertyDetails;
-
 

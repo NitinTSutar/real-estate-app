@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { useAuth } from '../context/useAuth.jsx';
-import { useProperties } from '../context/useProperties.jsx';
-import { useToast } from '../context/useToast.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { addProperty } from '../store/propertySlice';
+import { showToast } from '../store/toastSlice';
 
 const initialForm = {
   name: '',
@@ -19,9 +19,11 @@ const initialForm = {
 };
 
 const SellerDashboard = () => {
-  const { user } = useAuth();
-  const { properties, setProperties, inquiries, appointments } = useProperties();
-  const { showToast } = useToast();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+  const properties = useSelector((state) => state.property.properties);
+  const inquiries = useSelector((state) => state.property.inquiries);
+  const appointments = useSelector((state) => state.property.appointments);
 
   const [isRegistrationPaid, setIsRegistrationPaid] = useState(false);
   const [selectedVideoFileName, setSelectedVideoFileName] = useState('');
@@ -45,7 +47,7 @@ const SellerDashboard = () => {
     event.preventDefault();
 
     if (!isRegistrationPaid) {
-      showToast('Please complete mock seller registration payment first.', 'error');
+      dispatch(showToast({ message: 'Please complete mock seller registration payment first.', type: 'error' }));
       return;
     }
 
@@ -64,8 +66,8 @@ const SellerDashboard = () => {
       approved: false,
     };
 
-    setProperties((prev) => [newProperty, ...prev]);
-    showToast('Property added successfully (pending admin approval).', 'success');
+    dispatch(addProperty(newProperty));
+    dispatch(showToast({ message: 'Property added successfully (pending admin approval).', type: 'success' }));
 
     setFormData(initialForm);
     setSelectedVideoFileName('');

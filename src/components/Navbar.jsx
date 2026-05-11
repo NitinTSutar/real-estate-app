@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/useAuth.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, logout } from '../store/authSlice';
 
 const Navbar = () => {
-  const { user, login, logout, isLoggedIn, isBuyer, isSeller, isAdmin } = useAuth();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+  const isLoggedIn = !!user;
+  const isBuyer = user?.role === 'buyer';
+  const isSeller = user?.role === 'seller';
+  const isAdmin = user?.role === 'admin';
   const [selectedRole, setSelectedRole] = useState('buyer');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleGoogleLogin = () => {
-    login(selectedRole);
+    dispatch(login(selectedRole));
     setIsMobileMenuOpen(false);
   };
 
@@ -48,7 +54,7 @@ const Navbar = () => {
                   <p className="text-xs text-gray-500 capitalize">({user.role})</p>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={() => dispatch(logout())}
                   className="px-4 py-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 text-sm"
                 >
                   Logout
@@ -114,7 +120,7 @@ const Navbar = () => {
                   </div>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={() => dispatch(logout())}
                   className="w-full px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 text-sm"
                 >
                   Logout

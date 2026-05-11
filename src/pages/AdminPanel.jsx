@@ -1,27 +1,32 @@
-import { useProperties } from '../context/useProperties.jsx';
-import { useToast } from '../context/useToast.jsx';
-import { useAuth } from '../context/useAuth.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  approveAppointment,
+  approveProperty as approvePropertyAction,
+  rejectProperty as rejectPropertyAction,
+} from '../store/propertySlice';
+import { showToast } from '../store/toastSlice';
 
 const AdminPanel = () => {
-  const { properties, setProperties, appointments, approveAppointment } = useProperties();
-  const { showToast } = useToast();
-  const { registeredUsers } = useAuth();
+  const dispatch = useDispatch();
+  const properties = useSelector((state) => state.property.properties);
+  const appointments = useSelector((state) => state.property.appointments);
+  const registeredUsers = useSelector((state) => state.auth.registeredUsers);
   const registeredBuyers = registeredUsers.filter((user) => user.role === 'buyer');
   const registeredSellers = registeredUsers.filter((user) => user.role === 'seller');
 
   const approveProperty = (id) => {
-    setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, approved: true } : p)));
-    showToast(`Property ID ${id} Approved!`, 'success');
+    dispatch(approvePropertyAction(id));
+    dispatch(showToast({ message: `Property ID ${id} Approved!`, type: 'success' }));
   };
 
   const rejectProperty = (id) => {
-    setProperties((prev) => prev.filter((p) => p.id !== id));
-    showToast(`Property ID ${id} Rejected`, 'error');
+    dispatch(rejectPropertyAction(id));
+    dispatch(showToast({ message: `Property ID ${id} Rejected`, type: 'error' }));
   };
 
   const handleApproveAppointment = (appointmentId) => {
-    approveAppointment(appointmentId);
-    showToast('Appointment approved successfully.', 'success');
+    dispatch(approveAppointment(appointmentId));
+    dispatch(showToast({ message: 'Appointment approved successfully.', type: 'success' }));
   };
 
   return (
