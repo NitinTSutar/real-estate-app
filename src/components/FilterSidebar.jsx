@@ -12,6 +12,21 @@ const FilterSidebar = ({
 }) => {
   const bhkOptions = ['1BHK', '2BHK', '3BHK', '4BHK'];
   const possessionOptions = ['Ready', '6 months', '1 year'];
+  const minLimitLakh = 0;
+  const maxLimitLakh = 500;
+  const stepLakh = 10;
+
+  const rawMinLakh = Math.max(minLimitLakh, Math.min(maxLimitLakh, Math.floor((minPrice || 0) / 100000)));
+  const rawMaxLakh = maxPrice === Infinity
+    ? maxLimitLakh
+    : Math.max(minLimitLakh, Math.min(maxLimitLakh, Math.floor((maxPrice || 0) / 100000)));
+  const minLakh = Math.max(minLimitLakh, Math.min(rawMinLakh, rawMaxLakh - stepLakh));
+  const maxLakh = Math.min(maxLimitLakh, Math.max(rawMaxLakh, minLakh + stepLakh));
+
+  const selectedRangePercent = {
+    left: (minLakh / maxLimitLakh) * 100,
+    right: 100 - (maxLakh / maxLimitLakh) * 100,
+  };
 
   return (
     <div className={`bg-white p-4 rounded-2xl shadow-sm ${sticky && !horizontal ? 'sticky top-24' : ''}`}>
@@ -55,30 +70,46 @@ const FilterSidebar = ({
         <div>
           <p className="font-medium mb-3">Budget Range</p>
           <div className="space-y-4">
-            <div>
+            <div className="relative pt-6">
+              <div className="absolute left-0 right-0 top-[2.2rem] h-1.5 rounded-full bg-gray-200" />
+              <div
+                className="absolute top-[2.2rem] h-1.5 rounded-full bg-blue-500"
+                style={{
+                  left: `${selectedRangePercent.left}%`,
+                  right: `${selectedRangePercent.right}%`,
+                }}
+              />
               <input
                 type="range"
-                min="0"
-                max="500"
-                step="10"
-                value={minPrice / 100000}
-                onChange={(event) => setMinPrice(Number(event.target.value) * 100000)}
-                className="w-full accent-blue-600"
+                min={minLimitLakh}
+                max={maxLimitLakh}
+                step={stepLakh}
+                value={minLakh}
+                onChange={(event) => {
+                  const nextMinLakh = Number(event.target.value);
+                  const allowedMinLakh = Math.min(nextMinLakh, maxLakh - stepLakh);
+                  setMinPrice(allowedMinLakh * 100000);
+                }}
+                className="dual-range-slider min-range absolute top-6 left-0 w-full appearance-none bg-transparent pointer-events-none z-20"
               />
-              <p className="text-right text-sm">Rs.{minPrice / 100000} Lakh</p>
+              <input
+                type="range"
+                min={minLimitLakh}
+                max={maxLimitLakh}
+                step={stepLakh}
+                value={maxLakh}
+                onChange={(event) => {
+                  const nextMaxLakh = Number(event.target.value);
+                  const clampedMaxLakh = Math.max(nextMaxLakh, minLakh + stepLakh);
+                  setMaxPrice(clampedMaxLakh === maxLimitLakh ? Infinity : clampedMaxLakh * 100000);
+                }}
+                className="dual-range-slider max-range absolute top-6 left-0 w-full appearance-none bg-transparent pointer-events-none z-30"
+              />
             </div>
 
-            <div>
-              <input
-                type="range"
-                min="50"
-                max="500"
-                step="10"
-                value={maxPrice / 100000}
-                onChange={(event) => setMaxPrice(Number(event.target.value) * 100000)}
-                className="w-full accent-blue-600"
-              />
-              <p className="text-right text-sm">Rs.{maxPrice / 100000} Lakh</p>
+            <div className="flex items-center justify-between text-sm">
+              <p>Rs.{minLakh} Lakh</p>
+              <p>{maxPrice === Infinity ? 'Rs.500 Lakh+' : `Rs.${maxLakh} Lakh`}</p>
             </div>
           </div>
         </div>
@@ -89,7 +120,7 @@ const FilterSidebar = ({
               setBhk('');
               setPossession('');
               setMinPrice(0);
-              setMaxPrice(50000000);
+              setMaxPrice(Infinity);
             }}
             className="w-full md:w-auto px-4 py-2 text-sm text-gray-500 hover:text-red-600 border border-gray-200 rounded-xl"
           >

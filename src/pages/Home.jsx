@@ -16,7 +16,7 @@ const Home = () => {
     bhk: '',
     possession: '',
     minPrice: 0,
-    maxPrice: 50000000,
+    maxPrice: Infinity,
   });
   const [draftFilters, setDraftFilters] = useState(appliedFilters);
   const [view, setView] = useState('grid');
